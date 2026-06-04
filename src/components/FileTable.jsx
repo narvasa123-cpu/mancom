@@ -9,7 +9,7 @@ function formatCategory(category) {
   return category.category_year ? `${category.category_year} - ${category.name}` : category.name
 }
 
-export function FileTable({ files, categories, users, currentUser, filters, setFilters, onDownload, onDelete }) {
+export function FileTable({ files, categories, users, currentUser, filters, setFilters, onPreview, onDownload, onDelete }) {
   const canEdit = [roles.ADMIN, roles.SECRETARY].includes(currentUser.role)
   const canDelete = currentUser.role === roles.ADMIN
   const categoryById = Object.fromEntries(categories.map((category) => [category.id, category]))
@@ -72,9 +72,9 @@ export function FileTable({ files, categories, users, currentUser, filters, setF
                 <td className="px-4 py-4">{formatBytes(file.file_size)}</td>
                 <td className="px-4 py-4">
                   <div className="flex justify-end gap-2">
-                    <Link to={`/files/${file.id}`} className="rounded-lg border border-slate-200 p-2 text-slate-600 transition hover:border-red-200 hover:text-red-700" aria-label={`View ${file.title}`}>
+                    <button type="button" onClick={() => onPreview(file)} className="rounded-lg border border-slate-200 p-2 text-slate-600 transition hover:border-red-200 hover:text-red-700" aria-label={`Preview ${file.title}`}>
                       <Eye className="h-4 w-4" />
-                    </Link>
+                    </button>
                     <button onClick={() => onDownload(file)} className="rounded-lg border border-slate-200 p-2 text-slate-600 transition hover:border-red-200 hover:text-red-700" aria-label={`Download ${file.title}`}>
                       <Download className="h-4 w-4" />
                     </button>

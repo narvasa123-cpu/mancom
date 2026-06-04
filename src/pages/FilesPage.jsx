@@ -1,6 +1,7 @@
 import { FilePlus2 } from 'lucide-react'
 import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
+import { FilePreviewModal } from '../components/FilePreviewModal'
 import { FileTable } from '../components/FileTable'
 import { Button, Page } from '../components/ui'
 import { useAuth } from '../contexts/authContext'
@@ -9,6 +10,7 @@ import { deleteDocument, downloadFile } from '../services/documentService'
 export function FilesPage({ data }) {
   const { user } = useAuth()
   const [filters, setFilters] = useState({ search: '', category: '', fileType: '', year: '', month: '' })
+  const [previewFile, setPreviewFile] = useState(null)
   const [status, setStatus] = useState('')
 
   const filteredFiles = useMemo(() => {
@@ -67,8 +69,16 @@ export function FilesPage({ data }) {
         currentUser={user}
         filters={filters}
         setFilters={setFilters}
+        onPreview={setPreviewFile}
         onDownload={handleDownload}
         onDelete={handleDelete}
+      />
+      <FilePreviewModal
+        file={previewFile}
+        category={data.lookups.categoryById[previewFile?.category_id]}
+        uploader={data.lookups.userById[previewFile?.uploaded_by]}
+        onClose={() => setPreviewFile(null)}
+        onDownload={handleDownload}
       />
     </Page>
   )
