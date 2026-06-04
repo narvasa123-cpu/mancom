@@ -1,32 +1,68 @@
 import { FolderPlus, Pencil, Trash2 } from 'lucide-react'
-import { useState } from 'react'
-import { Button, Card, Field, Page, inputClass } from '../components/ui'
+import { useMemo, useState } from 'react'
+import { Badge, Button, Card, Field, Page, inputClass } from '../components/ui'
 import { useAuth } from '../contexts/authContext'
 import { createCategory, deleteCategoryRecord, updateCategory } from '../services/documentService'
 
 const currentYear = new Date().getFullYear()
+
+function normalizeCategoryName(name = '') {
+  return name.trim().toLowerCase()
+}
+
+function formatCategoryLabel(category) {
+  const year = category?.category_year || currentYear
+  return `${year} - ${category?.name || 'Untitled Category'}`
+}
 
 export function CategoriesPage({ data }) {
   const { user } = useAuth()
   const [form, setForm] = useState({ name: '', category_year: currentYear, description: '' })
   const [editingId, setEditingId] = useState('')
   const [status, setStatus] = useState('')
+  const sortedCategories = useMemo(() => {
+    return [...data.categories].sort((a, b) => {
+      const yearCompare = Number(b.category_year || currentYear) - Number(a.category_year || currentYear)
+      return yearCompare || a.name.localeCompare(b.name)
+    })
+  }, [data.categories])
+  const categoryNameCounts = useMemo(() => {
+    return data.categories.reduce((counts, category) => {
+      const key = normalizeCategoryName(category.name)
+      counts[key] = (counts[key] || 0) + 1
+      return counts
+    }, {})
+  }, [data.categories])
 
   async function saveCategory(event) {
     event.preventDefault()
-    if (!form.name.trim()) return
+    const name = form.name.trim()
+    if (!name) return
     setStatus('')
-    const payload = { ...form, category_year: Number(form.category_year) }
+    const payload = { ...form, name, category_year: Number(form.category_year) }
+    const duplicate = data.categories.some((category) => {
+      return (
+        category.id !== editingId &&
+        normalizeCategoryName(category.name) === normalizeCategoryName(payload.name) &&
+        Number(category.category_year || currentYear) === payload.category_year
+      )
+    })
+
+    if (duplicate) {
+      setStatus(`"${payload.name}" already exists for ${payload.category_year}. Choose a different year or category name.`)
+      return
+    }
+
     try {
       if (editingId) {
         const savedCategory = await updateCategory(editingId, payload)
         data.setCategories((items) => items.map((item) => item.id === editingId ? { ...item, ...savedCategory } : item))
-        data.addActivity('Category Updated', `${payload.category_year} ${payload.name} category was updated.`, user.id)
+        data.addActivity('Category Updated', `${payload.category_year} - ${payload.name} category was updated.`, user.id)
         setEditingId('')
       } else {
         const savedCategory = await createCategory(payload)
         data.setCategories((items) => [savedCategory, ...items])
-        data.addActivity('Category Added', `${payload.category_year} ${payload.name} category was added.`, user.id)
+        data.addActivity('Category Added', `${payload.category_year} - ${payload.name} category was added.`, user.id)
       }
       setForm({ name: '', category_year: currentYear, description: '' })
     } catch (error) {
@@ -36,13 +72,13 @@ export function CategoriesPage({ data }) {
 
   async function deleteCategory(id) {
     const category = data.categories.find((item) => item.id === id)
-    if (!window.confirm(`Delete "${category?.name}"? Files in this category will become uncategorized.`)) return
+    if (!window.confirm(`Delete "${formatCategoryLabel(category)}"? Files in this category will become uncategorized.`)) return
     setStatus('')
     try {
       await deleteCategoryRecord(id)
       data.setCategories((items) => items.filter((item) => item.id !== id))
       data.setFiles((items) => items.map((file) => file.category_id === id ? { ...file, category_id: null } : file))
-      data.addActivity('Category Deleted', `${category?.name} category was deleted.`, user.id)
+      data.addActivity('Category Deleted', `${formatCategoryLabel(category)} category was deleted.`, user.id)
     } catch (error) {
       setStatus(error.message || 'Unable to delete category.')
     }
@@ -96,10 +132,15 @@ export function CategoriesPage({ data }) {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
-                {data.categories.map((category) => (
+                {sortedCategories.map((category) => (
                   <tr key={category.id} className="hover:bg-red-50/50">
-                    <td className="px-4 py-4 font-semibold">{category.name}</td>
-                    <td className="px-4 py-4 font-semibold">{category.category_year || currentYear}</td>
+                    <td className="px-4 py-4">
+                      <p className="font-semibold text-slate-950">{formatCategoryLabel(category)}</p>
+                      {categoryNameCounts[normalizeCategoryName(category.name)] > 1 && (
+                        <p className="mt-1 text-xs font-medium text-slate-500">Same category name is used in another year.</p>
+                      )}
+                    </td>
+                    <td className="px-4 py-4"><Badge tone="red">{category.category_year || currentYear}</Badge></td>
                     <td className="px-4 py-4 text-slate-500">{category.description}</td>
                     <td className="px-4 py-4">{data.files.filter((file) => file.category_id === category.id).length}</td>
                     <td className="px-4 py-4">
