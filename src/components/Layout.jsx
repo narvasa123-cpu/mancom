@@ -163,6 +163,11 @@ export function Layout({ data }) {
         </header>
 
         <main className="px-4 py-6 sm:px-6 lg:px-8">
+          {data.loading && (
+            <div className="mb-4 rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-700">
+              Loading real Supabase data...
+            </div>
+          )}
           {data.error && (
             <div className="mb-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-900">
               Real Supabase data could not be loaded: {data.error}

@@ -9,6 +9,7 @@ import {
   notifications as seedNotifications,
   users as seedUsers,
 } from '../data/mockData'
+import { useAuth } from '../contexts/authContext'
 import { isDemoMode, isSupabaseConfigured } from '../lib/supabase'
 import { createActivityLog, createNotification, fetchAppData } from '../services/documentService'
 
@@ -46,6 +47,7 @@ function loadLocalData() {
 }
 
 export function useAppData() {
+  const { user, loading: authLoading } = useAuth()
   const initialData = isDemoMode ? loadLocalData() : emptyData
   const [files, setFiles] = useState(initialData.files)
   const [categories, setCategories] = useState(initialData.categories)
@@ -58,26 +60,37 @@ export function useAppData() {
   const [loading, setLoading] = useState(isSupabaseConfigured)
   const [error, setError] = useState('')
 
+  const replaceData = useCallback((nextData) => {
+    setFiles(nextData.files)
+    setCategories(nextData.categories)
+    setUsers(nextData.users)
+    setActivityLogs(nextData.activityLogs)
+    setNotifications(nextData.notifications)
+    setFileNotes(nextData.fileNotes)
+    setFileVersions(nextData.fileVersions)
+    setCalendarEvents(nextData.calendarEvents)
+  }, [])
+
   const refreshData = useCallback(async () => {
     if (!isSupabaseConfigured) return
+    if (authLoading) return
+    if (!user) {
+      replaceData(emptyData)
+      setLoading(false)
+      return
+    }
+
     setLoading(true)
     setError('')
     try {
       const nextData = await fetchAppData()
-      setFiles(nextData.files)
-      setCategories(nextData.categories)
-      setUsers(nextData.users)
-      setActivityLogs(nextData.activityLogs)
-      setNotifications(nextData.notifications)
-      setFileNotes(nextData.fileNotes)
-      setFileVersions(nextData.fileVersions)
-      setCalendarEvents(nextData.calendarEvents)
+      replaceData(nextData)
     } catch (refreshError) {
       setError(refreshError.message || 'Unable to load application data.')
     } finally {
       setLoading(false)
     }
-  }, [])
+  }, [authLoading, replaceData, user])
 
   useEffect(() => {
     Promise.resolve().then(refreshData)
