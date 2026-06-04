@@ -4,7 +4,7 @@ import { Link, useParams } from 'react-router-dom'
 import { Badge, Button, Card, Field, Page, inputClass } from '../components/ui'
 import { useAuth } from '../contexts/authContext'
 import { roles } from '../data/mockData'
-import { formatBytes, formatDateTime, isPreviewable } from '../lib/utils'
+import { formatBytes, formatDateTime, isImagePreview, isOfficePreview, isPreviewable } from '../lib/utils'
 import { createFileNote, downloadFile, getFileAccessUrl, uploadDocumentVersion, validateUpload } from '../services/documentService'
 
 export function FileDetails({ data }) {
@@ -51,6 +51,9 @@ export function FileDetails({ data }) {
   const notes = data.fileNotes.filter((item) => item.file_id === file.id)
   const versions = data.fileVersions.filter((item) => item.file_id === file.id).sort((a, b) => b.version - a.version)
   const canEdit = [roles.ADMIN, roles.SECRETARY].includes(user.role)
+  const officePreviewUrl = isOfficePreview(file.file_type) && previewUrl
+    ? `https://view.officeapps.live.com/op/embed.aspx?src=${encodeURIComponent(previewUrl)}`
+    : ''
 
   async function saveNote() {
     if (!note.trim()) return
@@ -120,14 +123,18 @@ export function FileDetails({ data }) {
           <div className="mb-4 flex items-center justify-between gap-4">
             <div>
               <h3 className="text-lg font-bold">File Preview</h3>
-              <p className="text-sm text-slate-500">PDF and image files can be previewed directly.</p>
+              <p className="text-sm text-slate-500">PDF, image, Word, Excel, and PowerPoint files can be previewed.</p>
             </div>
             <Badge tone="red">v{file.version}</Badge>
           </div>
 
           <div className="grid min-h-[22rem] place-items-center rounded-2xl border border-slate-200 bg-slate-100 p-6">
             {isPreviewable(file.file_type) && previewUrl ? (
-              file.file_type === 'pdf' ? <iframe title={file.title} src={previewUrl} className="h-[32rem] w-full rounded-xl bg-white" /> : <img src={previewUrl} alt={file.title} className="max-h-[32rem] rounded-xl object-contain" />
+              file.file_type === 'pdf'
+                ? <iframe title={file.title} src={previewUrl} className="h-[32rem] w-full rounded-xl bg-white" />
+                : isImagePreview(file.file_type)
+                  ? <img src={previewUrl} alt={file.title} className="max-h-[32rem] rounded-xl object-contain" />
+                  : <iframe title={file.title} src={officePreviewUrl} className="h-[32rem] w-full rounded-xl bg-white" />
             ) : (
               <div className="text-center">
                 <div className="mx-auto grid h-20 w-20 place-items-center rounded-3xl bg-white text-red-700 shadow-sm">

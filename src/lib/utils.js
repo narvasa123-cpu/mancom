@@ -38,5 +38,13 @@ export function getFileExtension(name = '') {
 }
 
 export function isPreviewable(fileType = '') {
-  return ['pdf', 'jpg', 'jpeg', 'png'].includes(fileType.toLowerCase())
+  return ['pdf', 'jpg', 'jpeg', 'png', 'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx'].includes(fileType.toLowerCase())
+}
+
+export function isImagePreview(fileType = '') {
+  return ['jpg', 'jpeg', 'png'].includes(fileType.toLowerCase())
+}
+
+export function isOfficePreview(fileType = '') {
+  return ['doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx'].includes(fileType.toLowerCase())
 }
