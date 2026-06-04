@@ -1,6 +1,6 @@
 import { FolderPlus, Pencil, Trash2 } from 'lucide-react'
 import { useMemo, useState } from 'react'
-import { Badge, Button, Card, Field, Page, inputClass } from '../components/ui'
+import { Button, Card, Field, Page, inputClass } from '../components/ui'
 import { useAuth } from '../contexts/authContext'
 import { createCategory, deleteCategoryRecord, updateCategory } from '../services/documentService'
 
@@ -96,9 +96,6 @@ export function CategoriesPage({ data }) {
         <Card>
           <h3 className="text-lg font-bold">{editingId ? 'Edit Category' : 'Add Category'}</h3>
           <form onSubmit={saveCategory} className="mt-4 space-y-4">
-            <Field label="Category Name">
-              <input className={inputClass} value={form.name} onChange={(event) => setForm((state) => ({ ...state, name: event.target.value }))} />
-            </Field>
             <Field label="Category Year">
               <input
                 className={inputClass}
@@ -108,6 +105,9 @@ export function CategoriesPage({ data }) {
                 value={form.category_year}
                 onChange={(event) => setForm((state) => ({ ...state, category_year: event.target.value }))}
               />
+            </Field>
+            <Field label="Category Name">
+              <input className={inputClass} value={form.name} onChange={(event) => setForm((state) => ({ ...state, name: event.target.value }))} placeholder="Example: Meeting Minutes" />
             </Field>
             <Field label="Description">
               <textarea className={`${inputClass} min-h-28`} value={form.description} onChange={(event) => setForm((state) => ({ ...state, description: event.target.value }))} />
@@ -124,8 +124,8 @@ export function CategoriesPage({ data }) {
             <table className="w-full min-w-[650px] text-left text-sm">
               <thead className="bg-red-800 text-white">
                 <tr>
-                  <th className="px-4 py-3">Name</th>
                   <th className="px-4 py-3">Year</th>
+                  <th className="px-4 py-3">Category Name</th>
                   <th className="px-4 py-3">Description</th>
                   <th className="px-4 py-3">Files</th>
                   <th className="px-4 py-3 text-right">Actions</th>
@@ -134,13 +134,13 @@ export function CategoriesPage({ data }) {
               <tbody className="divide-y divide-slate-100">
                 {sortedCategories.map((category) => (
                   <tr key={category.id} className="hover:bg-red-50/50">
+                    <td className="px-4 py-4 font-semibold">{category.category_year || currentYear}</td>
                     <td className="px-4 py-4">
-                      <p className="font-semibold text-slate-950">{formatCategoryLabel(category)}</p>
+                      <p className="font-semibold text-slate-950">{category.name}</p>
                       {categoryNameCounts[normalizeCategoryName(category.name)] > 1 && (
-                        <p className="mt-1 text-xs font-medium text-slate-500">Same category name is used in another year.</p>
+                        <p className="mt-1 text-xs font-medium text-slate-500">This name is also used in another year.</p>
                       )}
                     </td>
-                    <td className="px-4 py-4"><Badge tone="red">{category.category_year || currentYear}</Badge></td>
                     <td className="px-4 py-4 text-slate-500">{category.description}</td>
                     <td className="px-4 py-4">{data.files.filter((file) => file.category_id === category.id).length}</td>
                     <td className="px-4 py-4">

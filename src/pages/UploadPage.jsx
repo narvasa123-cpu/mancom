@@ -143,13 +143,13 @@ export function UploadPage({ data }) {
                 {categoryYears.map((year) => <option key={year} value={year}>{year}</option>)}
               </select>
             </Field>
-            <Field label="Category" error={errors.category_id?.message}>
+            <Field label="Category Name" error={errors.category_id?.message}>
               <select
                 className={inputClass}
                 disabled={!selectedCategoryYear}
-                {...register('category_id', { required: 'Category is required' })}
+                {...register('category_id', { required: 'Category name is required' })}
               >
-                <option value="">{selectedCategoryYear ? 'Select category' : 'Select year first'}</option>
+                <option value="">{selectedCategoryYear ? 'Select category name' : 'Select year first'}</option>
                 {categoriesForSelectedYear.map((category) => (
                   <option key={category.id} value={category.id}>
                     {category.name}
