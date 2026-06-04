@@ -7,6 +7,14 @@ function getEventDate(event) {
   return event?.event_date || event?.date || ''
 }
 
+function getEventDay(event) {
+  const value = getEventDate(event)
+  if (!value) return NaN
+  const parsed = new Date(value)
+  if (!Number.isNaN(parsed.getTime())) return parsed.getDate()
+  return Number(String(value).slice(-2))
+}
+
 function getEventColor(event) {
   if (event?.color) return event.color
   if (event?.type === 'Deadline') return 'bg-amber-500'
@@ -79,7 +87,7 @@ export function Dashboard({ data }) {
             {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day) => <span key={day}>{day}</span>)}
             {Array.from({ length: 30 }, (_, index) => {
               const day = index + 1
-              const event = data.calendarEvents.find((item) => Number(getEventDate(item).slice(-2)) === day)
+              const event = data.calendarEvents.find((item) => getEventDay(item) === day)
               return (
                 <div key={day} className="min-h-16 rounded-xl border border-slate-100 bg-slate-50 p-2 text-left">
                   <span className="font-semibold text-slate-700">{day}</span>
