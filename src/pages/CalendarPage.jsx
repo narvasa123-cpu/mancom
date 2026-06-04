@@ -28,11 +28,11 @@ export function CalendarPage({ data }) {
     }
   }
 
-  const eventDate = (event) => event.event_date || event.date
+  const eventDate = (event) => event?.event_date || event?.date || ''
   const eventColor = (event) => {
-    if (event.color) return event.color
-    if (event.type === 'Deadline') return 'bg-amber-500'
-    if (event.type === 'Upload') return 'bg-emerald-500'
+    if (event?.color) return event.color
+    if (event?.type === 'Deadline') return 'bg-amber-500'
+    if (event?.type === 'Upload') return 'bg-emerald-500'
     return 'bg-red-600'
   }
 
@@ -52,7 +52,7 @@ export function CalendarPage({ data }) {
           <div className={view === 'Month' ? 'grid grid-cols-7 gap-2' : 'grid gap-3'}>
             {Array.from({ length: view === 'Month' ? 30 : 7 }, (_, index) => {
               const day = index + 1
-              const event = data.calendarEvents.find((item) => Number(eventDate(item)?.slice(-2)) === day)
+              const event = data.calendarEvents.find((item) => Number(eventDate(item).slice(-2)) === day)
               return (
                 <div key={day} className="min-h-28 rounded-2xl border border-slate-100 bg-slate-50 p-3">
                   <p className="font-semibold text-slate-700">{day}</p>
