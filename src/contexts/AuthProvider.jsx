@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { currentUser, roles } from '../data/mockData'
-import { isSupabaseConfigured, supabase } from '../lib/supabase'
+import { isDemoMode, isSupabaseConfigured, supabase } from '../lib/supabase'
 import { AuthContext } from './authContext'
 
 const demoPasswords = {
@@ -50,8 +50,8 @@ export function AuthProvider({ children }) {
 
     async function loadUser() {
       if (!isSupabaseConfigured) {
-        const remembered = localStorage.getItem('mancom-demo-user')
-        if (mounted) setUser(remembered ? JSON.parse(remembered) : currentUser)
+        const remembered = isDemoMode ? localStorage.getItem('mancom-demo-user') : null
+        if (mounted) setUser(remembered ? JSON.parse(remembered) : null)
         if (mounted) setLoading(false)
         return
       }
@@ -94,6 +94,7 @@ export function AuthProvider({ children }) {
 
   async function signIn({ email, password, remember }) {
     if (!isSupabaseConfigured) {
+      if (!isDemoMode) throw new Error('Supabase is not configured for this deployment. Add VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY in Cloudflare build environment variables, then redeploy.')
       if (!password) throw new Error('Password is required.')
       const role = demoPasswords[email] || roles.ADMIN
       const demoUser = {

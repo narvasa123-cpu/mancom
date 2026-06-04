@@ -9,7 +9,7 @@ import {
   notifications as seedNotifications,
   users as seedUsers,
 } from '../data/mockData'
-import { isSupabaseConfigured } from '../lib/supabase'
+import { isDemoMode, isSupabaseConfigured } from '../lib/supabase'
 import { createActivityLog, createNotification, fetchAppData } from '../services/documentService'
 
 const localStoreKey = 'mancom-app-data'
@@ -46,7 +46,7 @@ function loadLocalData() {
 }
 
 export function useAppData() {
-  const initialData = isSupabaseConfigured ? emptyData : loadLocalData()
+  const initialData = isDemoMode ? loadLocalData() : emptyData
   const [files, setFiles] = useState(initialData.files)
   const [categories, setCategories] = useState(initialData.categories)
   const [users, setUsers] = useState(initialData.users)
@@ -84,7 +84,7 @@ export function useAppData() {
   }, [refreshData])
 
   useEffect(() => {
-    if (isSupabaseConfigured) return
+    if (!isDemoMode) return
     localStorage.setItem(localStoreKey, JSON.stringify({
       files,
       categories,

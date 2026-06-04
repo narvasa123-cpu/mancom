@@ -5,7 +5,7 @@ import { Navigate, useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { useAuth } from '../contexts/authContext'
 import { Button, inputClass } from '../components/ui'
-import { isSupabaseConfigured } from '../lib/supabase'
+import { isDemoMode, isSupabaseConfigured } from '../lib/supabase'
 
 export function Login() {
   const { user, signIn, resetPassword } = useAuth()
@@ -82,12 +82,17 @@ export function Login() {
           </div>
 
           {message && <div className="rounded-xl bg-white/15 px-3 py-2 text-sm text-white">{message}</div>}
+          {!isSupabaseConfigured && !isDemoMode && (
+            <div className="rounded-xl bg-white/15 px-3 py-2 text-sm text-white">
+              Supabase is not configured for this deployment. Add VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY as Cloudflare build environment variables, then redeploy.
+            </div>
+          )}
 
-          <Button type="submit" className="w-full" disabled={isSubmitting}>
+          <Button type="submit" className="w-full" disabled={isSubmitting || (!isSupabaseConfigured && !isDemoMode)}>
             {isSubmitting ? 'Signing in...' : 'Sign in securely'}
           </Button>
 
-          {!isSupabaseConfigured && (
+          {isDemoMode && (
             <p className="text-center text-xs text-red-50">Demo accepts admin@mancom.gov, secretary@mancom.gov, or staff@mancom.gov.</p>
           )}
         </form>
