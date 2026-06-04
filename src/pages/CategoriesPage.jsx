@@ -101,19 +101,21 @@ export function CategoriesPage({ data }) {
         <Card>
           <h3 className="text-lg font-bold">{editingId ? 'Edit Category' : 'Add Category'}</h3>
           <form onSubmit={saveCategory} className="mt-4 space-y-4">
-            <Field label="Category Year">
-              <select
-                className={inputClass}
-                value={form.category_year}
-                onChange={(event) => setForm((state) => ({ ...state, category_year: event.target.value }))}
-              >
-                <option value="">Select year</option>
-                {categoryYearOptions.map((year) => <option key={year} value={year}>{year}</option>)}
-              </select>
-            </Field>
-            <Field label="Category Name">
-              <input className={inputClass} value={form.name} onChange={(event) => setForm((state) => ({ ...state, name: event.target.value }))} placeholder="Example: Meeting Minutes" />
-            </Field>
+            <div className="grid gap-4 sm:grid-cols-[9rem_1fr]">
+              <Field label="Year">
+                <select
+                  className={inputClass}
+                  value={form.category_year}
+                  onChange={(event) => setForm((state) => ({ ...state, category_year: event.target.value }))}
+                >
+                  <option value="">Select year</option>
+                  {categoryYearOptions.map((year) => <option key={year} value={year}>{year}</option>)}
+                </select>
+              </Field>
+              <Field label="Category Name">
+                <input className={inputClass} value={form.name} onChange={(event) => setForm((state) => ({ ...state, name: event.target.value }))} placeholder="Example: Meeting Minutes" />
+              </Field>
+            </div>
             <Field label="Description">
               <textarea className={`${inputClass} min-h-28`} value={form.description} onChange={(event) => setForm((state) => ({ ...state, description: event.target.value }))} />
             </Field>
