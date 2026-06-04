@@ -52,12 +52,12 @@ export function Login() {
           <p className="mt-2 text-sm text-red-50">Secure document management for authorized personnel</p>
         </div>
 
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4" autoComplete="off">
           <label className="block">
             <span className="text-sm font-semibold text-white">Email Address</span>
             <div className="relative mt-1">
               <Mail className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
-              <input className={`${inputClass} pl-9`} type="email" autoComplete="email" {...register('email', { required: 'Email is required' })} />
+              <input className={`${inputClass} pl-9`} type="email" autoComplete="off" {...register('email', { required: 'Email is required' })} />
             </div>
             {errors.email && <p className="mt-1 text-xs text-red-100">{errors.email.message}</p>}
           </label>
@@ -66,7 +66,7 @@ export function Login() {
             <span className="text-sm font-semibold text-white">Password</span>
             <div className="relative mt-1">
               <LockKeyhole className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
-              <input className={`${inputClass} px-9`} type={showPassword ? 'text' : 'password'} autoComplete="current-password" {...register('password', { required: 'Password is required' })} />
+              <input className={`${inputClass} px-9`} type={showPassword ? 'text' : 'password'} autoComplete="new-password" {...register('password', { required: 'Password is required' })} />
               <button type="button" onClick={() => setShowPassword((visible) => !visible)} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500" aria-label="Toggle password visibility">
                 {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
               </button>
@@ -75,7 +75,7 @@ export function Login() {
 
           <div className="flex items-center justify-between gap-4 text-sm">
             <label className="flex items-center gap-2 text-white">
-              <input type="checkbox" className="h-4 w-4 rounded border-white/30 text-red-600 focus:ring-red-200" {...register('remember')} />
+              <input type="checkbox" autoComplete="off" className="h-4 w-4 rounded border-white/30 text-red-600 focus:ring-red-200" {...register('remember')} />
               Remember me
             </label>
             <button type="button" onClick={handleForgotPassword} className="font-semibold text-white underline-offset-4 hover:underline">Forgot password?</button>
