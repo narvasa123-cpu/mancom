@@ -163,6 +163,11 @@ export function Layout({ data }) {
         </header>
 
         <main className="px-4 py-6 sm:px-6 lg:px-8">
+          {data.error && (
+            <div className="mb-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-900">
+              Real Supabase data could not be loaded: {data.error}
+            </div>
+          )}
           {user?.missingProfile && (
             <div className="mb-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-medium text-amber-900">
               Your Supabase auth account is missing a matching public.users profile. Ask an administrator to create the profile row so role-based access works correctly.

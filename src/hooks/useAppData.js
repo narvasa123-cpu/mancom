@@ -25,6 +25,17 @@ const seedData = {
   calendarEvents: seedEvents,
 }
 
+const emptyData = {
+  files: [],
+  categories: [],
+  users: [],
+  activityLogs: [],
+  notifications: [],
+  fileNotes: [],
+  fileVersions: [],
+  calendarEvents: [],
+}
+
 function loadLocalData() {
   try {
     const stored = localStorage.getItem(localStoreKey)
@@ -35,7 +46,7 @@ function loadLocalData() {
 }
 
 export function useAppData() {
-  const initialData = isSupabaseConfigured ? seedData : loadLocalData()
+  const initialData = isSupabaseConfigured ? emptyData : loadLocalData()
   const [files, setFiles] = useState(initialData.files)
   const [categories, setCategories] = useState(initialData.categories)
   const [users, setUsers] = useState(initialData.users)
