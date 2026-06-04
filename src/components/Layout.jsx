@@ -1,7 +1,6 @@
 import {
   Bell,
   CalendarDays,
-  FileArchive,
   FilePlus2,
   Files,
   FolderTree,
@@ -10,7 +9,6 @@ import {
   Menu,
   ScrollText,
   Settings,
-  ShieldCheck,
   Users,
   X,
 } from 'lucide-react'
@@ -56,8 +54,8 @@ export function Layout({ data }) {
         )}
       >
         <div className="flex h-20 items-center gap-3 border-b border-white/10 px-5">
-          <div className="grid h-11 w-11 place-items-center rounded-2xl bg-white/10 ring-1 ring-white/20">
-            <FileArchive className="h-6 w-6" />
+          <div className="grid h-12 w-12 place-items-center overflow-hidden rounded-xl bg-white ring-1 ring-white/30">
+            <img src="/logo.jpg" alt="IBA College of Mindanao logo" className="h-full w-full object-contain" />
           </div>
           <div>
             <p className="text-sm font-semibold uppercase tracking-wide text-red-100">MANCOM</p>
@@ -115,8 +113,8 @@ export function Layout({ data }) {
               <Menu className="h-5 w-5" />
             </button>
             <div className="flex min-w-0 flex-1 items-center gap-3">
-              <div className="hidden h-12 w-12 place-items-center rounded-2xl bg-gradient-to-br from-red-700 to-red-600 text-white shadow-lg shadow-red-200 sm:grid">
-                <ShieldCheck className="h-6 w-6" />
+              <div className="hidden h-14 w-14 place-items-center overflow-hidden rounded-xl border border-slate-200 bg-white shadow-lg shadow-red-100 sm:grid">
+                <img src="/logo.jpg" alt="IBA College of Mindanao logo" className="h-full w-full object-contain" />
               </div>
               <div className="min-w-0">
                 <h1 className="truncate text-xl font-bold text-slate-950 sm:text-2xl">MANCOM Secretary File System</h1>

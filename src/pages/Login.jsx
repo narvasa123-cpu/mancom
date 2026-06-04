@@ -1,4 +1,4 @@
-import { Eye, EyeOff, FileArchive, LockKeyhole, Mail } from 'lucide-react'
+import { Eye, EyeOff, LockKeyhole, Mail } from 'lucide-react'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { Navigate, useNavigate } from 'react-router-dom'
@@ -45,8 +45,8 @@ export function Login() {
 
       <motion.div initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} className="w-full max-w-md rounded-3xl border border-white/20 bg-white/15 p-6 shadow-2xl backdrop-blur-2xl sm:p-8">
         <div className="mb-8 text-center text-white">
-          <div className="mx-auto mb-4 grid h-16 w-16 place-items-center rounded-2xl bg-white/15 ring-1 ring-white/30">
-            <FileArchive className="h-9 w-9" />
+          <div className="mx-auto mb-4 grid h-24 w-24 place-items-center overflow-hidden rounded-2xl bg-white p-1 ring-1 ring-white/30">
+            <img src="/logo.jpg" alt="IBA College of Mindanao logo" className="h-full w-full object-contain" />
           </div>
           <h1 className="text-2xl font-bold">MANCOM Secretary File System</h1>
           <p className="mt-2 text-sm text-red-50">Secure document management for authorized personnel</p>
