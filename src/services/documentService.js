@@ -46,7 +46,7 @@ export async function fetchAppData() {
     eventsResult,
   ] = await Promise.all([
     supabase.from('files').select('*').order('created_at', { ascending: false }),
-    supabase.from('categories').select('*').order('name', { ascending: true }),
+    supabase.from('categories').select('*').order('category_year', { ascending: false }).order('name', { ascending: true }),
     supabase.from('users').select('*').order('fullname', { ascending: true }),
     supabase.from('activity_logs').select('*').order('created_at', { ascending: false }).limit(250),
     supabase.from('notifications').select('*').order('created_at', { ascending: false }).limit(100),

@@ -1,6 +1,6 @@
 import { CheckCircle2, FileUp, UploadCloud } from 'lucide-react'
 import { useState } from 'react'
-import { useForm } from 'react-hook-form'
+import { useForm, useWatch } from 'react-hook-form'
 import { Button, Card, Field, Page, inputClass } from '../components/ui'
 import { useAuth } from '../contexts/authContext'
 import { getFileExtension } from '../lib/utils'
@@ -11,7 +11,9 @@ export function UploadPage({ data }) {
   const [selectedFile, setSelectedFile] = useState(null)
   const [progress, setProgress] = useState(0)
   const [status, setStatus] = useState('')
-  const { register, handleSubmit, reset, formState: { errors, isSubmitting } } = useForm()
+  const { control, register, handleSubmit, reset, setValue, formState: { errors, isSubmitting } } = useForm()
+  const selectedCategoryId = useWatch({ control, name: 'category_id' })
+  const selectedCategory = data.categories.find((category) => category.id === selectedCategoryId)
 
   function handleFile(file) {
     setStatus('')
@@ -120,9 +122,22 @@ export function UploadPage({ data }) {
             <textarea className={`${inputClass} min-h-28 resize-y`} {...register('description')} placeholder="Brief document summary, context, and handling remarks" />
           </Field>
           <Field label="Category" error={errors.category_id?.message}>
-            <select className={inputClass} {...register('category_id', { required: 'Category is required' })}>
+            <select
+              className={inputClass}
+              {...register('category_id', {
+                required: 'Category is required',
+                onChange: (event) => {
+                  const category = data.categories.find((item) => item.id === event.target.value)
+                  if (category?.category_year) setValue('document_year', Number(category.category_year), { shouldValidate: true })
+                },
+              })}
+            >
               <option value="">Select category</option>
-              {data.categories.map((category) => <option key={category.id} value={category.id}>{category.name}</option>)}
+              {data.categories.map((category) => (
+                <option key={category.id} value={category.id}>
+                  {category.category_year ? `${category.category_year} - ${category.name}` : category.name}
+                </option>
+              ))}
             </select>
           </Field>
           <Field label="Document Year" error={errors.document_year?.message}>
@@ -132,12 +147,14 @@ export function UploadPage({ data }) {
               min="1900"
               max="2100"
               placeholder="Example: 2023"
+              readOnly={Boolean(selectedCategory?.category_year)}
               {...register('document_year', {
                 required: 'Document year is required',
                 min: { value: 1900, message: 'Enter a valid year' },
                 max: { value: 2100, message: 'Enter a valid year' },
               })}
             />
+            {selectedCategory?.category_year && <p className="mt-1 text-xs text-slate-500">Year is set by the selected category.</p>}
           </Field>
           <Field label="Tags">
             <input className={inputClass} {...register('tags')} placeholder="minutes, policy, finance" />

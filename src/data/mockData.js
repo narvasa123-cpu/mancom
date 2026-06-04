@@ -14,14 +14,14 @@ export const currentUser = {
 }
 
 export const categories = [
-  { id: 'cat-1', name: 'Memorandum', description: 'Internal memoranda and executive advisories', created_at: '2026-01-12' },
-  { id: 'cat-2', name: 'Meeting Minutes', description: 'MANCOM minutes and attendance records', created_at: '2026-01-20' },
-  { id: 'cat-3', name: 'Resolutions', description: 'Approved board and management resolutions', created_at: '2026-02-02' },
-  { id: 'cat-4', name: 'Reports', description: 'Operational and administrative reports', created_at: '2026-02-18' },
-  { id: 'cat-5', name: 'Financial Documents', description: 'Budget, audit, and procurement files', created_at: '2026-03-03' },
-  { id: 'cat-6', name: 'Correspondence', description: 'Incoming and outgoing official letters', created_at: '2026-03-19' },
-  { id: 'cat-7', name: 'Policies', description: 'Policies, guidelines, and circulars', created_at: '2026-04-05' },
-  { id: 'cat-8', name: 'Other Documents', description: 'Supplementary reference materials', created_at: '2026-04-16' },
+  { id: 'cat-1', name: 'Memorandum', category_year: 2026, description: 'Internal memoranda and executive advisories', created_at: '2026-01-12' },
+  { id: 'cat-2', name: 'Meeting Minutes', category_year: 2026, description: 'MANCOM minutes and attendance records', created_at: '2026-01-20' },
+  { id: 'cat-3', name: 'Resolutions', category_year: 2026, description: 'Approved board and management resolutions', created_at: '2026-02-02' },
+  { id: 'cat-4', name: 'Reports', category_year: 2025, description: 'Operational and administrative reports', created_at: '2026-02-18' },
+  { id: 'cat-5', name: 'Financial Documents', category_year: 2025, description: 'Budget, audit, and procurement files', created_at: '2026-03-03' },
+  { id: 'cat-6', name: 'Correspondence', category_year: 2023, description: 'Incoming and outgoing official letters', created_at: '2026-03-19' },
+  { id: 'cat-7', name: 'Policies', category_year: 2024, description: 'Policies, guidelines, and circulars', created_at: '2026-04-05' },
+  { id: 'cat-8', name: 'Other Documents', category_year: 2026, description: 'Supplementary reference materials', created_at: '2026-04-16' },
 ]
 
 export const users = [

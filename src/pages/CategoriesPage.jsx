@@ -4,9 +4,11 @@ import { Button, Card, Field, Page, inputClass } from '../components/ui'
 import { useAuth } from '../contexts/authContext'
 import { createCategory, deleteCategoryRecord, updateCategory } from '../services/documentService'
 
+const currentYear = new Date().getFullYear()
+
 export function CategoriesPage({ data }) {
   const { user } = useAuth()
-  const [form, setForm] = useState({ name: '', description: '' })
+  const [form, setForm] = useState({ name: '', category_year: currentYear, description: '' })
   const [editingId, setEditingId] = useState('')
   const [status, setStatus] = useState('')
 
@@ -14,18 +16,19 @@ export function CategoriesPage({ data }) {
     event.preventDefault()
     if (!form.name.trim()) return
     setStatus('')
+    const payload = { ...form, category_year: Number(form.category_year) }
     try {
       if (editingId) {
-        const savedCategory = await updateCategory(editingId, form)
+        const savedCategory = await updateCategory(editingId, payload)
         data.setCategories((items) => items.map((item) => item.id === editingId ? { ...item, ...savedCategory } : item))
-        data.addActivity('Category Updated', `${form.name} category was updated.`, user.id)
+        data.addActivity('Category Updated', `${payload.category_year} ${payload.name} category was updated.`, user.id)
         setEditingId('')
       } else {
-        const savedCategory = await createCategory(form)
+        const savedCategory = await createCategory(payload)
         data.setCategories((items) => [savedCategory, ...items])
-        data.addActivity('Category Added', `${form.name} category was added.`, user.id)
+        data.addActivity('Category Added', `${payload.category_year} ${payload.name} category was added.`, user.id)
       }
-      setForm({ name: '', description: '' })
+      setForm({ name: '', category_year: currentYear, description: '' })
     } catch (error) {
       setStatus(error.message || 'Unable to save category.')
     }
@@ -47,7 +50,7 @@ export function CategoriesPage({ data }) {
 
   function startEdit(category) {
     setEditingId(category.id)
-    setForm({ name: category.name, description: category.description || '' })
+    setForm({ name: category.name, category_year: category.category_year || currentYear, description: category.description || '' })
   }
 
   return (
@@ -60,12 +63,22 @@ export function CategoriesPage({ data }) {
             <Field label="Category Name">
               <input className={inputClass} value={form.name} onChange={(event) => setForm((state) => ({ ...state, name: event.target.value }))} />
             </Field>
+            <Field label="Category Year">
+              <input
+                className={inputClass}
+                type="number"
+                min="1900"
+                max="2100"
+                value={form.category_year}
+                onChange={(event) => setForm((state) => ({ ...state, category_year: event.target.value }))}
+              />
+            </Field>
             <Field label="Description">
               <textarea className={`${inputClass} min-h-28`} value={form.description} onChange={(event) => setForm((state) => ({ ...state, description: event.target.value }))} />
             </Field>
             <div className="flex flex-wrap gap-2">
               <Button type="submit"><FolderPlus className="h-4 w-4" />{editingId ? 'Save Category' : 'Add Category'}</Button>
-              {editingId && <Button type="button" variant="outline" onClick={() => { setEditingId(''); setForm({ name: '', description: '' }) }}>Cancel</Button>}
+              {editingId && <Button type="button" variant="outline" onClick={() => { setEditingId(''); setForm({ name: '', category_year: currentYear, description: '' }) }}>Cancel</Button>}
             </div>
           </form>
         </Card>
@@ -76,6 +89,7 @@ export function CategoriesPage({ data }) {
               <thead className="bg-red-800 text-white">
                 <tr>
                   <th className="px-4 py-3">Name</th>
+                  <th className="px-4 py-3">Year</th>
                   <th className="px-4 py-3">Description</th>
                   <th className="px-4 py-3">Files</th>
                   <th className="px-4 py-3 text-right">Actions</th>
@@ -85,6 +99,7 @@ export function CategoriesPage({ data }) {
                 {data.categories.map((category) => (
                   <tr key={category.id} className="hover:bg-red-50/50">
                     <td className="px-4 py-4 font-semibold">{category.name}</td>
+                    <td className="px-4 py-4 font-semibold">{category.category_year || currentYear}</td>
                     <td className="px-4 py-4 text-slate-500">{category.description}</td>
                     <td className="px-4 py-4">{data.files.filter((file) => file.category_id === category.id).length}</td>
                     <td className="px-4 py-4">

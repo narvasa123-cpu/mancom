@@ -4,6 +4,11 @@ import { roles } from '../data/mockData'
 import { formatBytes, formatDate } from '../lib/utils'
 import { Badge, Button, Card, inputClass } from './ui'
 
+function formatCategory(category) {
+  if (!category) return 'Uncategorized'
+  return category.category_year ? `${category.category_year} - ${category.name}` : category.name
+}
+
 export function FileTable({ files, categories, users, currentUser, filters, setFilters, onDownload, onDelete }) {
   const canEdit = [roles.ADMIN, roles.SECRETARY].includes(currentUser.role)
   const canDelete = currentUser.role === roles.ADMIN
@@ -23,7 +28,7 @@ export function FileTable({ files, categories, users, currentUser, filters, setF
         </div>
         <select className={inputClass} value={filters.category} onChange={(event) => setFilters((state) => ({ ...state, category: event.target.value }))}>
           <option value="">All categories</option>
-          {categories.map((category) => <option key={category.id} value={category.id}>{category.name}</option>)}
+          {categories.map((category) => <option key={category.id} value={category.id}>{formatCategory(category)}</option>)}
         </select>
         <select className={inputClass} value={filters.fileType} onChange={(event) => setFilters((state) => ({ ...state, fileType: event.target.value }))}>
           <option value="">All types</option>
@@ -58,7 +63,7 @@ export function FileTable({ files, categories, users, currentUser, filters, setF
                     {file.tags?.map((tag) => <Badge key={tag}>#{tag}</Badge>)}
                   </div>
                 </td>
-                <td className="px-4 py-4">{categories.find((item) => item.id === file.category_id)?.name || 'Uncategorized'}</td>
+                <td className="px-4 py-4">{formatCategory(categories.find((item) => item.id === file.category_id))}</td>
                 <td className="px-4 py-4">{users.find((item) => item.id === file.uploaded_by)?.fullname || 'Unknown'}</td>
                 <td className="px-4 py-4 font-semibold">{file.document_year || new Date(file.created_at).getFullYear()}</td>
                 <td className="px-4 py-4">{formatDate(file.created_at)}</td>

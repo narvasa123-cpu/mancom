@@ -15,7 +15,8 @@ export function FilesPage({ data }) {
     const term = filters.search.toLowerCase()
     return data.files.filter((file) => {
       const uploadedBy = data.lookups.userById[file.uploaded_by]?.fullname || ''
-      const category = data.lookups.categoryById[file.category_id]?.name || ''
+      const categoryRecord = data.lookups.categoryById[file.category_id]
+      const category = categoryRecord?.category_year ? `${categoryRecord.category_year} ${categoryRecord.name}` : categoryRecord?.name || ''
       const created = new Date(file.created_at)
       const documentYear = file.document_year || created.getFullYear()
       return (

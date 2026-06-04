@@ -16,9 +16,11 @@ create table public.users (
 
 create table public.categories (
   id uuid primary key default gen_random_uuid(),
-  name text not null unique,
+  name text not null,
+  category_year integer not null default extract(year from now())::integer,
   description text,
-  created_at timestamptz not null default now()
+  created_at timestamptz not null default now(),
+  unique (name, category_year)
 );
 
 create table public.files (
@@ -228,7 +230,7 @@ insert into public.categories (name, description) values
   ('Correspondence', 'Incoming and outgoing official letters'),
   ('Policies', 'Policies, guidelines, and circulars'),
   ('Other Documents', 'Supplementary reference materials')
-on conflict (name) do nothing;
+on conflict (name, category_year) do nothing;
 
 insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
 values (

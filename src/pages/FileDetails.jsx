@@ -51,6 +51,7 @@ export function FileDetails({ data }) {
   const notes = data.fileNotes.filter((item) => item.file_id === file.id)
   const versions = data.fileVersions.filter((item) => item.file_id === file.id).sort((a, b) => b.version - a.version)
   const canEdit = [roles.ADMIN, roles.SECRETARY].includes(user.role)
+  const categoryName = category?.category_year ? `${category.category_year} - ${category.name}` : category?.name
   const officePreviewUrl = isOfficePreview(file.file_type) && previewUrl
     ? `https://view.officeapps.live.com/op/embed.aspx?src=${encodeURIComponent(previewUrl)}`
     : ''
@@ -151,7 +152,7 @@ export function FileDetails({ data }) {
           <Card>
             <h3 className="text-lg font-bold">File Information</h3>
             <dl className="mt-4 grid gap-3 text-sm">
-              <div className="flex justify-between gap-4"><dt className="text-slate-500">Category</dt><dd className="font-semibold">{category?.name}</dd></div>
+              <div className="flex justify-between gap-4"><dt className="text-slate-500">Category</dt><dd className="font-semibold">{categoryName}</dd></div>
               <div className="flex justify-between gap-4"><dt className="text-slate-500">Document Year</dt><dd className="font-semibold">{file.document_year || new Date(file.created_at).getFullYear()}</dd></div>
               <div className="flex justify-between gap-4"><dt className="text-slate-500">Uploaded By</dt><dd className="font-semibold">{uploader?.fullname}</dd></div>
               <div className="flex justify-between gap-4"><dt className="text-slate-500">Date Uploaded</dt><dd className="font-semibold">{formatDateTime(file.created_at)}</dd></div>
