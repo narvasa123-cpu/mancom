@@ -35,6 +35,7 @@ export function UploadPage({ data }) {
         title: values.title,
         description: values.description,
         category_id: values.category_id,
+        document_year: Number(values.document_year),
         tags: values.tags?.split(',').map((tag) => tag.trim()).filter(Boolean) || [],
       }
       setProgress(55)
@@ -123,6 +124,20 @@ export function UploadPage({ data }) {
               <option value="">Select category</option>
               {data.categories.map((category) => <option key={category.id} value={category.id}>{category.name}</option>)}
             </select>
+          </Field>
+          <Field label="Document Year" error={errors.document_year?.message}>
+            <input
+              className={inputClass}
+              type="number"
+              min="1900"
+              max="2100"
+              placeholder="Example: 2023"
+              {...register('document_year', {
+                required: 'Document year is required',
+                min: { value: 1900, message: 'Enter a valid year' },
+                max: { value: 2100, message: 'Enter a valid year' },
+              })}
+            />
           </Field>
           <Field label="Tags">
             <input className={inputClass} {...register('tags')} placeholder="minutes, policy, finance" />

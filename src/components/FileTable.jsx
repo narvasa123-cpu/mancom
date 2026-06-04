@@ -7,6 +7,7 @@ import { Badge, Button, Card, inputClass } from './ui'
 export function FileTable({ files, categories, users, currentUser, filters, setFilters, onDownload, onDelete }) {
   const canEdit = [roles.ADMIN, roles.SECRETARY].includes(currentUser.role)
   const canDelete = currentUser.role === roles.ADMIN
+  const years = [...new Set(files.map((file) => file.document_year || new Date(file.created_at).getFullYear()))].sort((a, b) => b - a)
 
   return (
     <Card className="p-0">
@@ -29,19 +30,20 @@ export function FileTable({ files, categories, users, currentUser, filters, setF
           {[...new Set(files.map((file) => file.file_type))].map((type) => <option key={type} value={type}>{type.toUpperCase()}</option>)}
         </select>
         <select className={inputClass} value={filters.year} onChange={(event) => setFilters((state) => ({ ...state, year: event.target.value }))}>
-          <option value="">All years</option>
-          {[...new Set(files.map((file) => new Date(file.created_at).getFullYear()))].map((year) => <option key={year} value={year}>{year}</option>)}
+          <option value="">All document years</option>
+          {years.map((year) => <option key={year} value={year}>{year}</option>)}
         </select>
       </div>
 
       <div className="max-h-[64vh] overflow-auto">
-        <table className="w-full min-w-[900px] border-collapse text-left text-sm">
+        <table className="w-full min-w-[1000px] border-collapse text-left text-sm">
           <thead className="sticky top-0 z-10 bg-red-800 text-white">
             <tr>
               <th className="px-4 py-3 font-semibold">Document</th>
               <th className="px-4 py-3 font-semibold">Category</th>
               <th className="px-4 py-3 font-semibold">Uploaded By</th>
-              <th className="px-4 py-3 font-semibold">Date</th>
+              <th className="px-4 py-3 font-semibold">Year</th>
+              <th className="px-4 py-3 font-semibold">Uploaded</th>
               <th className="px-4 py-3 font-semibold">Type</th>
               <th className="px-4 py-3 font-semibold">Size</th>
               <th className="px-4 py-3 text-right font-semibold">Actions</th>
@@ -58,6 +60,7 @@ export function FileTable({ files, categories, users, currentUser, filters, setF
                 </td>
                 <td className="px-4 py-4">{categories.find((item) => item.id === file.category_id)?.name || 'Uncategorized'}</td>
                 <td className="px-4 py-4">{users.find((item) => item.id === file.uploaded_by)?.fullname || 'Unknown'}</td>
+                <td className="px-4 py-4 font-semibold">{file.document_year || new Date(file.created_at).getFullYear()}</td>
                 <td className="px-4 py-4">{formatDate(file.created_at)}</td>
                 <td className="px-4 py-4"><Badge tone="red">{file.file_type.toUpperCase()}</Badge></td>
                 <td className="px-4 py-4">{formatBytes(file.file_size)}</td>
