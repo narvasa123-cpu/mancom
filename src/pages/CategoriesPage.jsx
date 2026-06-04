@@ -33,11 +33,16 @@ export function CategoriesPage({ data }) {
       return counts
     }, {})
   }, [data.categories])
+  const categoryYearOptions = useMemo(() => {
+    const suggestedYears = Array.from({ length: 7 }, (_, index) => currentYear + 1 - index)
+    return [...new Set([...suggestedYears, ...data.categories.map((category) => category.category_year).filter(Boolean)])]
+      .sort((a, b) => b - a)
+  }, [data.categories])
 
   async function saveCategory(event) {
     event.preventDefault()
     const name = form.name.trim()
-    if (!name) return
+    if (!name || !form.category_year) return
     setStatus('')
     const payload = { ...form, name, category_year: Number(form.category_year) }
     const duplicate = data.categories.some((category) => {
@@ -97,14 +102,14 @@ export function CategoriesPage({ data }) {
           <h3 className="text-lg font-bold">{editingId ? 'Edit Category' : 'Add Category'}</h3>
           <form onSubmit={saveCategory} className="mt-4 space-y-4">
             <Field label="Category Year">
-              <input
+              <select
                 className={inputClass}
-                type="number"
-                min="1900"
-                max="2100"
                 value={form.category_year}
                 onChange={(event) => setForm((state) => ({ ...state, category_year: event.target.value }))}
-              />
+              >
+                <option value="">Select year</option>
+                {categoryYearOptions.map((year) => <option key={year} value={year}>{year}</option>)}
+              </select>
             </Field>
             <Field label="Category Name">
               <input className={inputClass} value={form.name} onChange={(event) => setForm((state) => ({ ...state, name: event.target.value }))} placeholder="Example: Meeting Minutes" />
