@@ -3,6 +3,17 @@ import { Link } from 'react-router-dom'
 import { Button, Card, Page, StatCard } from '../components/ui'
 import { formatDateTime } from '../lib/utils'
 
+function getEventDate(event) {
+  return event?.event_date || event?.date || ''
+}
+
+function getEventColor(event) {
+  if (event?.color) return event.color
+  if (event?.type === 'Deadline') return 'bg-amber-500'
+  if (event?.type === 'Upload') return 'bg-emerald-500'
+  return 'bg-red-600'
+}
+
 export function Dashboard({ data }) {
   const recentFiles = [...data.files].sort((a, b) => new Date(b.created_at) - new Date(a.created_at)).slice(0, 5)
   const timeline = data.activityLogs.slice(0, 6)
@@ -68,11 +79,11 @@ export function Dashboard({ data }) {
             {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day) => <span key={day}>{day}</span>)}
             {Array.from({ length: 30 }, (_, index) => {
               const day = index + 1
-              const event = data.calendarEvents.find((item) => Number(item.date.slice(-2)) === day)
+              const event = data.calendarEvents.find((item) => Number(getEventDate(item).slice(-2)) === day)
               return (
                 <div key={day} className="min-h-16 rounded-xl border border-slate-100 bg-slate-50 p-2 text-left">
                   <span className="font-semibold text-slate-700">{day}</span>
-                  {event && <div className={`mt-2 rounded-lg px-2 py-1 text-[11px] font-semibold text-white ${event.color}`}>{event.type}</div>}
+                  {event && <div className={`mt-2 rounded-lg px-2 py-1 text-[11px] font-semibold text-white ${getEventColor(event)}`}>{event.type}</div>}
                 </div>
               )
             })}
