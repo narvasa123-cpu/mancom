@@ -17,13 +17,13 @@ export function FilesPage({ data }) {
       const uploadedBy = data.lookups.userById[file.uploaded_by]?.fullname || ''
       const categoryRecord = data.lookups.categoryById[file.category_id]
       const category = categoryRecord?.category_year ? `${categoryRecord.category_year} ${categoryRecord.name}` : categoryRecord?.name || ''
+      const categoryYear = categoryRecord?.category_year || ''
       const created = new Date(file.created_at)
-      const documentYear = file.document_year || created.getFullYear()
       return (
-        (!term || [file.title, file.description, category, uploadedBy, documentYear, ...(file.tags || [])].join(' ').toLowerCase().includes(term)) &&
+        (!term || [file.title, file.description, category, uploadedBy, categoryYear, ...(file.tags || [])].join(' ').toLowerCase().includes(term)) &&
         (!filters.category || file.category_id === filters.category) &&
         (!filters.fileType || file.file_type === filters.fileType) &&
-        (!filters.year || String(documentYear) === String(filters.year)) &&
+        (!filters.year || String(categoryYear) === String(filters.year)) &&
         (!filters.month || String(created.getMonth() + 1) === String(filters.month))
       )
     })

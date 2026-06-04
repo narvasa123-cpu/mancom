@@ -32,7 +32,6 @@ create table public.files (
   file_path text,
   file_size bigint not null,
   file_type text not null,
-  document_year integer not null default extract(year from now())::integer,
   tags text[] not null default '{}',
   uploaded_by uuid references public.users(id) on delete set null,
   version integer not null default 1,

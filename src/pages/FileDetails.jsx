@@ -153,7 +153,6 @@ export function FileDetails({ data }) {
             <h3 className="text-lg font-bold">File Information</h3>
             <dl className="mt-4 grid gap-3 text-sm">
               <div className="flex justify-between gap-4"><dt className="text-slate-500">Category</dt><dd className="font-semibold">{categoryName}</dd></div>
-              <div className="flex justify-between gap-4"><dt className="text-slate-500">Document Year</dt><dd className="font-semibold">{file.document_year || new Date(file.created_at).getFullYear()}</dd></div>
               <div className="flex justify-between gap-4"><dt className="text-slate-500">Uploaded By</dt><dd className="font-semibold">{uploader?.fullname}</dd></div>
               <div className="flex justify-between gap-4"><dt className="text-slate-500">Date Uploaded</dt><dd className="font-semibold">{formatDateTime(file.created_at)}</dd></div>
               <div className="flex justify-between gap-4"><dt className="text-slate-500">File Type</dt><dd className="font-semibold">{file.file_type.toUpperCase()}</dd></div>

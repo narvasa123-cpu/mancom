@@ -12,7 +12,8 @@ function formatCategory(category) {
 export function FileTable({ files, categories, users, currentUser, filters, setFilters, onDownload, onDelete }) {
   const canEdit = [roles.ADMIN, roles.SECRETARY].includes(currentUser.role)
   const canDelete = currentUser.role === roles.ADMIN
-  const years = [...new Set(files.map((file) => file.document_year || new Date(file.created_at).getFullYear()))].sort((a, b) => b - a)
+  const categoryById = Object.fromEntries(categories.map((category) => [category.id, category]))
+  const years = [...new Set(files.map((file) => categoryById[file.category_id]?.category_year).filter(Boolean))].sort((a, b) => b - a)
 
   return (
     <Card className="p-0">
@@ -35,7 +36,7 @@ export function FileTable({ files, categories, users, currentUser, filters, setF
           {[...new Set(files.map((file) => file.file_type))].map((type) => <option key={type} value={type}>{type.toUpperCase()}</option>)}
         </select>
         <select className={inputClass} value={filters.year} onChange={(event) => setFilters((state) => ({ ...state, year: event.target.value }))}>
-          <option value="">All document years</option>
+          <option value="">All category years</option>
           {years.map((year) => <option key={year} value={year}>{year}</option>)}
         </select>
       </div>
@@ -47,7 +48,7 @@ export function FileTable({ files, categories, users, currentUser, filters, setF
               <th className="px-4 py-3 font-semibold">Document</th>
               <th className="px-4 py-3 font-semibold">Category</th>
               <th className="px-4 py-3 font-semibold">Uploaded By</th>
-              <th className="px-4 py-3 font-semibold">Year</th>
+              <th className="px-4 py-3 font-semibold">Category Year</th>
               <th className="px-4 py-3 font-semibold">Uploaded</th>
               <th className="px-4 py-3 font-semibold">Type</th>
               <th className="px-4 py-3 font-semibold">Size</th>
@@ -65,7 +66,7 @@ export function FileTable({ files, categories, users, currentUser, filters, setF
                 </td>
                 <td className="px-4 py-4">{formatCategory(categories.find((item) => item.id === file.category_id))}</td>
                 <td className="px-4 py-4">{users.find((item) => item.id === file.uploaded_by)?.fullname || 'Unknown'}</td>
-                <td className="px-4 py-4 font-semibold">{file.document_year || new Date(file.created_at).getFullYear()}</td>
+                <td className="px-4 py-4 font-semibold">{categoryById[file.category_id]?.category_year || 'Uncategorized'}</td>
                 <td className="px-4 py-4">{formatDate(file.created_at)}</td>
                 <td className="px-4 py-4"><Badge tone="red">{file.file_type.toUpperCase()}</Badge></td>
                 <td className="px-4 py-4">{formatBytes(file.file_size)}</td>
