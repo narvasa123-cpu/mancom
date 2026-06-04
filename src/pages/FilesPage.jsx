@@ -64,6 +64,7 @@ export function FilesPage({ data }) {
       {(status || data.error) && <div className="rounded-xl bg-red-50 px-4 py-3 text-sm font-medium text-red-800">{status || data.error}</div>}
       <FileTable
         files={filteredFiles}
+        allFiles={data.files}
         categories={data.categories}
         users={data.users}
         currentUser={user}

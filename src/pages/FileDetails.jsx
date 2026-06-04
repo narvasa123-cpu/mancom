@@ -180,7 +180,7 @@ export function FileDetails({ data }) {
               {notes.map((item) => (
                 <div key={item.id} className="rounded-2xl bg-slate-50 p-4">
                   <p className="text-sm text-slate-700">{item.note}</p>
-                  <p className="mt-2 text-xs text-slate-400">{data.lookups.userById[item.created_by]?.fullname} · {formatDateTime(item.created_at)}</p>
+                  <p className="mt-2 text-xs text-slate-400">{data.lookups.userById[item.created_by]?.fullname} - {formatDateTime(item.created_at)}</p>
                 </div>
               ))}
             </div>

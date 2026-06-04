@@ -9,15 +9,22 @@ function formatCategory(category) {
   return category.category_year ? `${category.category_year} - ${category.name}` : category.name
 }
 
-export function FileTable({ files, categories, users, currentUser, filters, setFilters, onPreview, onDownload, onDelete }) {
+export function FileTable({ files, allFiles = files, categories, users, currentUser, filters, setFilters, onPreview, onDownload, onDelete }) {
   const canEdit = [roles.ADMIN, roles.SECRETARY].includes(currentUser.role)
   const canDelete = currentUser.role === roles.ADMIN
   const categoryById = Object.fromEntries(categories.map((category) => [category.id, category]))
-  const years = [...new Set(files.map((file) => categoryById[file.category_id]?.category_year).filter(Boolean))].sort((a, b) => b - a)
+  const years = [...new Set(allFiles.map((file) => categoryById[file.category_id]?.category_year).filter(Boolean))].sort((a, b) => b - a)
+  const fileTypes = [...new Set(allFiles.map((file) => file.file_type).filter(Boolean))].sort()
+  const uploadMonths = [...new Set(allFiles.map((file) => new Date(file.created_at).getMonth() + 1).filter(Boolean))].sort((a, b) => a - b)
+  const hasFilters = Object.values(filters).some(Boolean)
+
+  function clearFilters() {
+    setFilters({ search: '', category: '', fileType: '', year: '', month: '' })
+  }
 
   return (
     <Card className="p-0">
-      <div className="grid gap-3 border-b border-slate-200 p-4 md:grid-cols-[1fr_12rem_10rem_8rem]">
+      <div className="grid gap-3 border-b border-slate-200 p-4 md:grid-cols-[1fr_12rem_9rem_8rem_8rem]">
         <div className="relative">
           <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
           <input
@@ -33,11 +40,19 @@ export function FileTable({ files, categories, users, currentUser, filters, setF
         </select>
         <select className={inputClass} value={filters.fileType} onChange={(event) => setFilters((state) => ({ ...state, fileType: event.target.value }))}>
           <option value="">All types</option>
-          {[...new Set(files.map((file) => file.file_type))].map((type) => <option key={type} value={type}>{type.toUpperCase()}</option>)}
+          {fileTypes.map((type) => <option key={type} value={type}>{type.toUpperCase()}</option>)}
         </select>
         <select className={inputClass} value={filters.year} onChange={(event) => setFilters((state) => ({ ...state, year: event.target.value }))}>
           <option value="">All category years</option>
           {years.map((year) => <option key={year} value={year}>{year}</option>)}
+        </select>
+        <select className={inputClass} value={filters.month} onChange={(event) => setFilters((state) => ({ ...state, month: event.target.value }))}>
+          <option value="">All months</option>
+          {uploadMonths.map((month) => (
+            <option key={month} value={month}>
+              {new Intl.DateTimeFormat('en-US', { month: 'short' }).format(new Date(2026, month - 1, 1))}
+            </option>
+          ))}
         </select>
       </div>
 
@@ -56,40 +71,51 @@ export function FileTable({ files, categories, users, currentUser, filters, setF
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100">
-            {files.map((file) => (
-              <tr key={file.id} className="bg-white transition hover:bg-red-50/60">
-                <td className="px-4 py-4">
-                  <p className="font-semibold text-slate-950">{file.title}</p>
-                  <div className="mt-2 flex flex-wrap gap-1.5">
-                    {file.tags?.map((tag) => <Badge key={tag}>#{tag}</Badge>)}
-                  </div>
-                </td>
-                <td className="px-4 py-4">{formatCategory(categories.find((item) => item.id === file.category_id))}</td>
-                <td className="px-4 py-4">{users.find((item) => item.id === file.uploaded_by)?.fullname || 'Unknown'}</td>
-                <td className="px-4 py-4 font-semibold">{categoryById[file.category_id]?.category_year || 'Uncategorized'}</td>
-                <td className="px-4 py-4">{formatDate(file.created_at)}</td>
-                <td className="px-4 py-4"><Badge tone="red">{file.file_type.toUpperCase()}</Badge></td>
-                <td className="px-4 py-4">{formatBytes(file.file_size)}</td>
-                <td className="px-4 py-4">
-                  <div className="flex justify-end gap-2">
-                    <button type="button" onClick={() => onPreview(file)} className="rounded-lg border border-slate-200 p-2 text-slate-600 transition hover:border-red-200 hover:text-red-700" aria-label={`Preview ${file.title}`}>
-                      <Eye className="h-4 w-4" />
-                    </button>
-                    <button onClick={() => onDownload(file)} className="rounded-lg border border-slate-200 p-2 text-slate-600 transition hover:border-red-200 hover:text-red-700" aria-label={`Download ${file.title}`}>
-                      <Download className="h-4 w-4" />
-                    </button>
-                    {canEdit && <Link to={`/files/${file.id}`} className="rounded-lg border border-slate-200 p-2 text-slate-600 transition hover:border-red-200 hover:text-red-700" aria-label={`Edit ${file.title}`}><FilePenLine className="h-4 w-4" /></Link>}
-                    {canDelete && <button onClick={() => onDelete(file)} className="rounded-lg border border-red-100 p-2 text-red-600 transition hover:bg-red-50" aria-label={`Delete ${file.title}`}><Trash2 className="h-4 w-4" /></button>}
-                  </div>
+            {files.length > 0 ? (
+              files.map((file) => (
+                <tr key={file.id} className="bg-white transition hover:bg-red-50/60">
+                  <td className="px-4 py-4">
+                    <p className="font-semibold text-slate-950">{file.title}</p>
+                    <div className="mt-2 flex flex-wrap gap-1.5">
+                      {file.tags?.map((tag) => <Badge key={tag}>#{tag}</Badge>)}
+                    </div>
+                  </td>
+                  <td className="px-4 py-4">{formatCategory(categories.find((item) => item.id === file.category_id))}</td>
+                  <td className="px-4 py-4">{users.find((item) => item.id === file.uploaded_by)?.fullname || 'Unknown'}</td>
+                  <td className="px-4 py-4 font-semibold">{categoryById[file.category_id]?.category_year || 'Uncategorized'}</td>
+                  <td className="px-4 py-4">{formatDate(file.created_at)}</td>
+                  <td className="px-4 py-4"><Badge tone="red">{file.file_type.toUpperCase()}</Badge></td>
+                  <td className="px-4 py-4">{formatBytes(file.file_size)}</td>
+                  <td className="px-4 py-4">
+                    <div className="flex justify-end gap-2">
+                      <button type="button" onClick={() => onPreview(file)} className="rounded-lg border border-slate-200 p-2 text-slate-600 transition hover:border-red-200 hover:text-red-700" aria-label={`Preview ${file.title}`}>
+                        <Eye className="h-4 w-4" />
+                      </button>
+                      <button onClick={() => onDownload(file)} className="rounded-lg border border-slate-200 p-2 text-slate-600 transition hover:border-red-200 hover:text-red-700" aria-label={`Download ${file.title}`}>
+                        <Download className="h-4 w-4" />
+                      </button>
+                      {canEdit && <Link to={`/files/${file.id}`} className="rounded-lg border border-slate-200 p-2 text-slate-600 transition hover:border-red-200 hover:text-red-700" aria-label={`Edit ${file.title}`}><FilePenLine className="h-4 w-4" /></Link>}
+                      {canDelete && <button onClick={() => onDelete(file)} className="rounded-lg border border-red-100 p-2 text-red-600 transition hover:bg-red-50" aria-label={`Delete ${file.title}`}><Trash2 className="h-4 w-4" /></button>}
+                    </div>
+                  </td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td colSpan={8} className="bg-white px-4 py-14 text-center">
+                  <Search className="mx-auto h-8 w-8 text-slate-300" />
+                  <p className="mt-3 font-semibold text-slate-950">No documents found</p>
+                  <p className="mt-1 text-sm text-slate-500">Try a different search term or adjust the filters.</p>
+                  {hasFilters && <Button type="button" variant="outline" className="mt-4" onClick={clearFilters}>Clear Filters</Button>}
                 </td>
               </tr>
-            ))}
+            )}
           </tbody>
         </table>
       </div>
 
       <div className="flex flex-col gap-3 border-t border-slate-200 px-4 py-3 text-sm text-slate-500 sm:flex-row sm:items-center sm:justify-between">
-        <span>Showing {files.length} secure document records</span>
+        <span>Showing {files.length} of {allFiles.length} secure document records</span>
         <div className="flex gap-2">
           <Button variant="outline" disabled>Previous</Button>
           <Button variant="outline" disabled>Next</Button>
