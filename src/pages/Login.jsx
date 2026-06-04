@@ -13,7 +13,7 @@ export function Login() {
   const [showPassword, setShowPassword] = useState(false)
   const [message, setMessage] = useState('')
   const { register, handleSubmit, getValues, formState: { errors, isSubmitting } } = useForm({
-    defaultValues: { email: 'admin@mancom.gov', password: 'password', remember: true },
+    defaultValues: { email: '', password: '', remember: false },
   })
 
   if (user) return <Navigate to="/" replace />
@@ -57,7 +57,7 @@ export function Login() {
             <span className="text-sm font-semibold text-white">Email Address</span>
             <div className="relative mt-1">
               <Mail className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
-              <input className={`${inputClass} pl-9`} type="email" {...register('email', { required: 'Email is required' })} />
+              <input className={`${inputClass} pl-9`} type="email" autoComplete="email" {...register('email', { required: 'Email is required' })} />
             </div>
             {errors.email && <p className="mt-1 text-xs text-red-100">{errors.email.message}</p>}
           </label>
@@ -66,7 +66,7 @@ export function Login() {
             <span className="text-sm font-semibold text-white">Password</span>
             <div className="relative mt-1">
               <LockKeyhole className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
-              <input className={`${inputClass} px-9`} type={showPassword ? 'text' : 'password'} {...register('password', { required: 'Password is required' })} />
+              <input className={`${inputClass} px-9`} type={showPassword ? 'text' : 'password'} autoComplete="current-password" {...register('password', { required: 'Password is required' })} />
               <button type="button" onClick={() => setShowPassword((visible) => !visible)} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500" aria-label="Toggle password visibility">
                 {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
               </button>
