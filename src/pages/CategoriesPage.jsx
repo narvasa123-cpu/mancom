@@ -95,7 +95,7 @@ export function CategoriesPage({ data }) {
   }
 
   return (
-    <Page title="Categories by Year" description="Maintain separate year and category name records for uploads and repository filters.">
+    <Page title="Categories by Year" description="Maintain each year with its own category names for uploads and repository filters.">
       {(status || data.error) && <div className="rounded-xl bg-red-50 px-4 py-3 text-sm font-medium text-red-800">{status || data.error}</div>}
       <section className="grid gap-6 xl:grid-cols-[0.75fr_1.25fr]">
         <Card>
@@ -131,34 +131,48 @@ export function CategoriesPage({ data }) {
             <table className="w-full min-w-[650px] text-left text-sm">
               <thead className="bg-red-800 text-white">
                 <tr>
-                  <th className="px-4 py-3">Year</th>
                   <th className="px-4 py-3">Category Name</th>
                   <th className="px-4 py-3">Description</th>
                   <th className="px-4 py-3">Files</th>
                   <th className="px-4 py-3 text-right">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100">
-                {sortedCategories.map((category) => (
-                  <tr key={category.id} className="hover:bg-red-50/50">
-                    <td className="px-4 py-4 font-semibold">{category.category_year || currentYear}</td>
-                    <td className="px-4 py-4">
-                      <p className="font-semibold text-slate-950">{category.name}</p>
-                      {categoryNameCounts[normalizeCategoryName(category.name)] > 1 && (
-                        <p className="mt-1 text-xs font-medium text-slate-500">This name is also used in another year.</p>
-                      )}
-                    </td>
-                    <td className="px-4 py-4 text-slate-500">{category.description}</td>
-                    <td className="px-4 py-4">{data.files.filter((file) => file.category_id === category.id).length}</td>
-                    <td className="px-4 py-4">
-                      <div className="flex justify-end gap-2">
-                        <Button variant="outline" onClick={() => startEdit(category)}><Pencil className="h-4 w-4" />Edit</Button>
-                        <Button variant="danger" onClick={() => deleteCategory(category.id)}><Trash2 className="h-4 w-4" />Delete</Button>
-                      </div>
-                    </td>
-                  </tr>
+              {categoryYearOptions
+                .map((year) => ({
+                  year,
+                  categories: sortedCategories.filter((category) => Number(category.category_year || currentYear) === Number(year)),
+                }))
+                .filter((group) => group.categories.length > 0)
+                .map((group) => (
+                  <tbody key={group.year} className="divide-y divide-slate-100">
+                    <tr className="bg-red-50/80">
+                      <td colSpan={4} className="px-4 py-3">
+                        <div className="flex flex-wrap items-center justify-between gap-2">
+                          <p className="text-sm font-bold text-red-900">Year {group.year}</p>
+                          <span className="text-xs font-semibold text-red-700">{group.categories.length} category names</span>
+                        </div>
+                      </td>
+                    </tr>
+                    {group.categories.map((category) => (
+                      <tr key={category.id} className="hover:bg-red-50/50">
+                        <td className="px-4 py-4">
+                          <p className="font-semibold text-slate-950">{category.name}</p>
+                          {categoryNameCounts[normalizeCategoryName(category.name)] > 1 && (
+                            <p className="mt-1 text-xs font-medium text-slate-500">This name is also used in another year.</p>
+                          )}
+                        </td>
+                        <td className="px-4 py-4 text-slate-500">{category.description}</td>
+                        <td className="px-4 py-4">{data.files.filter((file) => file.category_id === category.id).length}</td>
+                        <td className="px-4 py-4">
+                          <div className="flex justify-end gap-2">
+                            <Button variant="outline" onClick={() => startEdit(category)}><Pencil className="h-4 w-4" />Edit</Button>
+                            <Button variant="danger" onClick={() => deleteCategory(category.id)}><Trash2 className="h-4 w-4" />Delete</Button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
                 ))}
-              </tbody>
             </table>
           </div>
         </Card>
