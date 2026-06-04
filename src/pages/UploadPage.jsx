@@ -1,6 +1,6 @@
 import { CheckCircle2, FileUp, UploadCloud } from 'lucide-react'
-import { useState } from 'react'
-import { useForm } from 'react-hook-form'
+import { useMemo, useState } from 'react'
+import { useForm, useWatch } from 'react-hook-form'
 import { Button, Card, Field, Page, inputClass } from '../components/ui'
 import { useAuth } from '../contexts/authContext'
 import { getFileExtension } from '../lib/utils'
@@ -11,7 +11,18 @@ export function UploadPage({ data }) {
   const [selectedFile, setSelectedFile] = useState(null)
   const [progress, setProgress] = useState(0)
   const [status, setStatus] = useState('')
-  const { register, handleSubmit, reset, formState: { errors, isSubmitting } } = useForm()
+  const { register, control, handleSubmit, reset, setValue, formState: { errors, isSubmitting } } = useForm()
+  const selectedCategoryYear = useWatch({ control, name: 'category_year', defaultValue: '' })
+  const categoryYears = useMemo(() => {
+    return [...new Set(data.categories.map((category) => category.category_year).filter(Boolean))]
+      .sort((a, b) => b - a)
+  }, [data.categories])
+  const categoriesForSelectedYear = useMemo(() => {
+    return data.categories
+      .filter((category) => String(category.category_year || '') === String(selectedCategoryYear))
+      .sort((a, b) => a.name.localeCompare(b.name))
+  }, [data.categories, selectedCategoryYear])
+  const categoryYearField = register('category_year', { required: 'Category year is required' })
 
   function handleFile(file) {
     setStatus('')
@@ -118,19 +129,35 @@ export function UploadPage({ data }) {
           <Field label="Description">
             <textarea className={`${inputClass} min-h-28 resize-y`} {...register('description')} placeholder="Brief document summary, context, and handling remarks" />
           </Field>
-          <Field label="Category" error={errors.category_id?.message}>
-            <select
-              className={inputClass}
-              {...register('category_id', { required: 'Category is required' })}
-            >
-              <option value="">Select category</option>
-              {data.categories.map((category) => (
-                <option key={category.id} value={category.id}>
-                  {category.category_year ? `${category.category_year} - ${category.name}` : category.name}
-                </option>
-              ))}
-            </select>
-          </Field>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <Field label="Category Year" error={errors.category_year?.message}>
+              <select
+                className={inputClass}
+                {...categoryYearField}
+                onChange={(event) => {
+                  categoryYearField.onChange(event)
+                  setValue('category_id', '')
+                }}
+              >
+                <option value="">Select year</option>
+                {categoryYears.map((year) => <option key={year} value={year}>{year}</option>)}
+              </select>
+            </Field>
+            <Field label="Category" error={errors.category_id?.message}>
+              <select
+                className={inputClass}
+                disabled={!selectedCategoryYear}
+                {...register('category_id', { required: 'Category is required' })}
+              >
+                <option value="">{selectedCategoryYear ? 'Select category' : 'Select year first'}</option>
+                {categoriesForSelectedYear.map((category) => (
+                  <option key={category.id} value={category.id}>
+                    {category.name}
+                  </option>
+                ))}
+              </select>
+            </Field>
+          </div>
           <Field label="Tags">
             <input className={inputClass} {...register('tags')} placeholder="minutes, policy, finance" />
           </Field>
