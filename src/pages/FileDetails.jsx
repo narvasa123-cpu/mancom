@@ -1,11 +1,11 @@
 import { Download, FileText, History, MessageSquareText, Save, UploadCloud } from 'lucide-react'
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { Badge, Button, Card, Field, Page, inputClass } from '../components/ui'
 import { useAuth } from '../contexts/authContext'
 import { roles } from '../data/mockData'
 import { formatBytes, formatDateTime, isImagePreview, isOfficePreview, isPreviewable } from '../lib/utils'
-import { createFileNote, downloadFile, getFileAccessUrl, uploadDocumentVersion, validateUpload } from '../services/documentService'
+import { createFileNote, downloadFile, getFileAccessUrl, updateDocumentMetadata, uploadDocumentVersion, validateUpload } from '../services/documentService'
 
 export function FileDetails({ data }) {
   const { id } = useParams()
@@ -15,6 +15,7 @@ export function FileDetails({ data }) {
   const [previewUrl, setPreviewUrl] = useState('')
   const [status, setStatus] = useState('')
   const [versionUploading, setVersionUploading] = useState(false)
+  const category = file ? data.lookups.categoryById[file.category_id] : null
 
   useEffect(() => {
     let active = true
@@ -46,11 +47,11 @@ export function FileDetails({ data }) {
     )
   }
 
-  const category = data.lookups.categoryById[file.category_id]
   const uploader = data.lookups.userById[file.uploaded_by]
   const notes = data.fileNotes.filter((item) => item.file_id === file.id)
   const versions = data.fileVersions.filter((item) => item.file_id === file.id).sort((a, b) => b.version - a.version)
   const canEdit = [roles.ADMIN, roles.SECRETARY].includes(user.role)
+  const canEditMetadata = user.role === roles.ADMIN
   const categoryName = category?.category_year ? `${category.category_year} - ${category.name}` : category?.name
   const officePreviewUrl = isOfficePreview(file.file_type) && previewUrl
     ? `https://view.officeapps.live.com/op/embed.aspx?src=${encodeURIComponent(previewUrl)}`
@@ -163,6 +164,18 @@ export function FileDetails({ data }) {
             </div>
           </Card>
 
+          {canEditMetadata && (
+            <AdminFileMetadataEditor
+              key={file.id}
+              file={file}
+              category={category}
+              categories={data.categories}
+              data={data}
+              user={user}
+              setStatus={setStatus}
+            />
+          )}
+
           <Card>
             <div className="mb-4 flex items-center gap-2">
               <MessageSquareText className="h-5 w-5 text-red-700" />
@@ -230,5 +243,117 @@ export function FileDetails({ data }) {
         </div>
       </Card>
     </Page>
+  )
+}
+
+function AdminFileMetadataEditor({ file, category, categories, data, user, setStatus }) {
+  const [form, setForm] = useState({
+    title: file.title || '',
+    description: file.description || '',
+    category_year: category?.category_year || '',
+    category_id: file.category_id || '',
+    tags: file.tags?.join(', ') || '',
+  })
+  const [saving, setSaving] = useState(false)
+
+  const categoryYears = useMemo(() => {
+    return [...new Set(categories.map((item) => item.category_year).filter(Boolean))]
+      .sort((a, b) => b - a)
+  }, [categories])
+
+  const categoriesForSelectedYear = useMemo(() => {
+    return categories
+      .filter((item) => String(item.category_year || '') === String(form.category_year))
+      .sort((a, b) => a.name.localeCompare(b.name))
+  }, [categories, form.category_year])
+
+  async function saveMetadata(event) {
+    event.preventDefault()
+    const title = form.title.trim()
+    if (!title) {
+      setStatus('File title is required.')
+      return
+    }
+    if (!form.category_id) {
+      setStatus('Please select a category year and category name.')
+      return
+    }
+
+    setSaving(true)
+    setStatus('')
+    try {
+      const payload = {
+        title,
+        description: form.description.trim(),
+        category_id: form.category_id,
+        tags: form.tags.split(',').map((tag) => tag.trim()).filter(Boolean),
+      }
+      const updatedDocument = await updateDocumentMetadata(file.id, payload)
+      data.setFiles((items) => items.map((item) => item.id === file.id ? { ...item, ...updatedDocument } : item))
+      data.addActivity('File Updated', `${user.fullname} updated ${title}.`, user.id)
+      await data.refreshData()
+      setStatus('File details updated.')
+    } catch (error) {
+      setStatus(error.message || 'Unable to update file details.')
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  return (
+    <Card>
+      <h3 className="text-lg font-bold">Edit Uploaded File</h3>
+      <form onSubmit={saveMetadata} className="mt-4 space-y-4">
+        <Field label="File Title">
+          <input
+            className={inputClass}
+            value={form.title}
+            onChange={(event) => setForm((state) => ({ ...state, title: event.target.value }))}
+          />
+        </Field>
+        <Field label="Description">
+          <textarea
+            className={`${inputClass} min-h-24 resize-y`}
+            value={form.description}
+            onChange={(event) => setForm((state) => ({ ...state, description: event.target.value }))}
+          />
+        </Field>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <Field label="Category Year">
+            <select
+              className={inputClass}
+              value={form.category_year}
+              onChange={(event) => setForm((state) => ({ ...state, category_year: event.target.value, category_id: '' }))}
+            >
+              <option value="">Select year</option>
+              {categoryYears.map((year) => <option key={year} value={year}>{year}</option>)}
+            </select>
+          </Field>
+          <Field label="Category Name">
+            <select
+              className={inputClass}
+              disabled={!form.category_year}
+              value={form.category_id}
+              onChange={(event) => setForm((state) => ({ ...state, category_id: event.target.value }))}
+            >
+              <option value="">{form.category_year ? 'Select category name' : 'Select year first'}</option>
+              {categoriesForSelectedYear.map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}
+            </select>
+          </Field>
+        </div>
+        <Field label="Tags">
+          <input
+            className={inputClass}
+            value={form.tags}
+            onChange={(event) => setForm((state) => ({ ...state, tags: event.target.value }))}
+            placeholder="minutes, policy, finance"
+          />
+        </Field>
+        <Button type="submit" disabled={saving}>
+          <Save className="h-4 w-4" />
+          {saving ? 'Saving...' : 'Save File Details'}
+        </Button>
+      </form>
+    </Card>
   )
 }

@@ -211,6 +211,25 @@ export async function uploadDocumentVersion({ file, document, userId }) {
   return { version, document: updatedDocument }
 }
 
+export async function updateDocumentMetadata(documentId, payload) {
+  const metadata = {
+    ...payload,
+    updated_at: new Date().toISOString(),
+  }
+
+  if (!isSupabaseConfigured) return { id: documentId, ...metadata }
+
+  const { data, error } = await supabase
+    .from('files')
+    .update(metadata)
+    .eq('id', documentId)
+    .select()
+    .single()
+
+  if (error) throw error
+  return data
+}
+
 export async function createActivityLog(payload) {
   if (!isSupabaseConfigured) return payload
   const { error } = await supabase.from('activity_logs').insert(payload)
