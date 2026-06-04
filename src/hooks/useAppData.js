@@ -13,7 +13,8 @@ import { useAuth } from '../contexts/authContext'
 import { isDemoMode, isSupabaseConfigured } from '../lib/supabase'
 import { createActivityLog, createNotification, fetchAppData } from '../services/documentService'
 
-const localStoreKey = 'mancom-app-data'
+const localStoreKey = 'mancom-app-data-v2'
+const legacyLocalStoreKeys = ['mancom-app-data']
 
 const seedData = {
   files: seedFiles,
@@ -39,6 +40,7 @@ const emptyData = {
 
 function loadLocalData() {
   try {
+    legacyLocalStoreKeys.forEach((key) => localStorage.removeItem(key))
     const stored = localStorage.getItem(localStoreKey)
     return stored ? { ...seedData, ...JSON.parse(stored) } : seedData
   } catch {

@@ -95,11 +95,11 @@ export function CategoriesPage({ data }) {
   }
 
   return (
-    <Page title="Categories" description="Maintain official document classifications used across the repository.">
+    <Page title="Categories by Year" description="Maintain separate year and category name records for uploads and repository filters.">
       {(status || data.error) && <div className="rounded-xl bg-red-50 px-4 py-3 text-sm font-medium text-red-800">{status || data.error}</div>}
       <section className="grid gap-6 xl:grid-cols-[0.75fr_1.25fr]">
         <Card>
-          <h3 className="text-lg font-bold">{editingId ? 'Edit Category' : 'Add Category'}</h3>
+          <h3 className="text-lg font-bold">{editingId ? 'Edit Category Name' : 'Add Category Name'}</h3>
           <form onSubmit={saveCategory} className="mt-4 space-y-4">
             <div className="grid gap-4 sm:grid-cols-[9rem_1fr]">
               <Field label="Year">
@@ -120,7 +120,7 @@ export function CategoriesPage({ data }) {
               <textarea className={`${inputClass} min-h-28`} value={form.description} onChange={(event) => setForm((state) => ({ ...state, description: event.target.value }))} />
             </Field>
             <div className="flex flex-wrap gap-2">
-              <Button type="submit"><FolderPlus className="h-4 w-4" />{editingId ? 'Save Category' : 'Add Category'}</Button>
+              <Button type="submit"><FolderPlus className="h-4 w-4" />{editingId ? 'Save Category Name' : 'Add Category Name'}</Button>
               {editingId && <Button type="button" variant="outline" onClick={() => { setEditingId(''); setForm({ name: '', category_year: currentYear, description: '' }) }}>Cancel</Button>}
             </div>
           </form>
